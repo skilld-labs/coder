@@ -169,6 +169,15 @@ class Drupal_Sniffs_WhiteSpace_ScopeIndentSniff implements PHP_CodeSniffer_Sniff
                 $exact = $this->exact;
             }
 
+            // If this is a chained metod invocation on an object with starting
+            // with "->" we skip exact matching since there is no standard
+            // defined yet. Only report an error if the indentation is further
+            // to the left than the current expectation.
+            if ($tokens[$firstToken]['code'] === T_OBJECT_OPERATOR
+                && $tokens[$firstToken]['column'] >= $expectedIndent) {
+              $exact = false;
+            }
+
             if ($exact === true || $tokens[$firstToken]['column'] < $expectedIndent) {
                 $error = 'Line indented incorrectly; expected %s spaces, found %s';
                 $data  = array(
