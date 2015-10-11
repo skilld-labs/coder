@@ -188,6 +188,13 @@ class Drupal_Sniffs_Array_ArraySniff implements PHP_CodeSniffer_Sniff
                 break;
             }
 
+            $expectedColumn = $firstLineColumn + 2;
+            // If the line starts with "->" then we assume an additional level of
+            // indentation.
+            if ($tokens[$newLineStart]['code'] === T_OBJECT_OPERATOR) {
+                $expectedColumn += 2;
+            }
+
             // Skip lines in nested structures.
             // Long array syntax.
             if (isset($tokens[$newLineStart]['nested_parenthesis']) === true) {
@@ -196,24 +203,24 @@ class Drupal_Sniffs_Array_ArraySniff implements PHP_CodeSniffer_Sniff
                 $isMultiLineString = $tokens[($newLineStart - 1)]['code'] === T_CONSTANT_ENCAPSED_STRING
                     && substr($tokens[($newLineStart - 1)]['content'], -1) === $phpcsFile->eolChar;
                 if ($innerNesting === $tokens[$stackPtr][$parenthesis_closer]
-                    && $tokens[$newLineStart]['column'] !== ($firstLineColumn + 2)
+                    && $tokens[$newLineStart]['column'] !== $expectedColumn
                     && $isMultiLineString === false
                 ) {
                     $error = 'Array indentation error, expected %s spaces but found %s';
                     $data  = array(
-                              $firstLineColumn + 1,
+                              $expectedColumn + 1,
                               $tokens[$newLineStart]['column'] - 1,
                              );
                     $fix   = $phpcsFile->addFixableError($error, $newLineStart, 'ArrayIndentation', $data);
                     if ($fix === true) {
                         if ($tokens[$newLineStart]['column'] === 1) {
-                            $phpcsFile->fixer->addContentBefore($newLineStart, str_repeat(' ', ($firstLineColumn + 1)));
+                            $phpcsFile->fixer->addContentBefore($newLineStart, str_repeat(' ', ($expectedColumn + 1)));
                         } else {
-                            $phpcsFile->fixer->replaceToken(($newLineStart - 1), str_repeat(' ', ($firstLineColumn + 1)));
+                            $phpcsFile->fixer->replaceToken(($newLineStart - 1), str_repeat(' ', ($expectedColumn + 1)));
                         }
                     }
                 }
-            } else if (($tokens[$newLineStart]['column'] - 1) !== ($firstLineColumn + 1)) {
+            } else if ($tokens[$newLineStart]['column'] !== $expectedColumn) {
                 // Short array syntax.
                 // Skip lines that are part of a multi-line string.
                 $isMultiLineString = $tokens[($newLineStart - 1)]['code'] === T_CONSTANT_ENCAPSED_STRING
@@ -221,15 +228,15 @@ class Drupal_Sniffs_Array_ArraySniff implements PHP_CodeSniffer_Sniff
                 if ($isMultiLineString === false) {
                     $error = 'Array indentation error, expected %s spaces but found %s';
                     $data  = array(
-                              $firstLineColumn + 1,
+                              $expectedColumn + 1,
                               $tokens[$newLineStart]['column'] - 1,
                              );
                     $fix   = $phpcsFile->addFixableError($error, $newLineStart, 'ArrayIndentation', $data);
                     if ($fix === true) {
                         if ($tokens[$newLineStart]['column'] === 1) {
-                            $phpcsFile->fixer->addContentBefore($newLineStart, str_repeat(' ', ($firstLineColumn + 1)));
+                            $phpcsFile->fixer->addContentBefore($newLineStart, str_repeat(' ', ($expectedColumn + 1)));
                         } else {
-                            $phpcsFile->fixer->replaceToken(($newLineStart - 1), str_repeat(' ', ($firstLineColumn + 1)));
+                            $phpcsFile->fixer->replaceToken(($newLineStart - 1), str_repeat(' ', ($expectedColumn + 1)));
                         }
                     }
                 }

@@ -39,6 +39,8 @@ class Drupal_Sniffs_Array_ArrayUnitTest extends CoderSniffUnitTest
             37 => 1,
             42 => 1,
             44 => 1,
+            59 => 1,
+            76 => 1,
         );
 
     }//end getWarningList()
