@@ -107,18 +107,6 @@ class Drupal_Sniffs_Array_ArraySniff implements PHP_CodeSniffer_Sniff
             return;
         }
 
-        // Special case: Opening two multi line structures in one line is ugly.
-        if (isset($tokens[$stackPtr]['nested_parenthesis']) === true) {
-            end($tokens[$stackPtr]['nested_parenthesis']);
-            $outerNesting = key($tokens[$stackPtr]['nested_parenthesis']);
-            if ($tokens[$outerNesting]['line'] === $tokens[$stackPtr]['line']) {
-                // We could throw a warning here that the start of the array
-                // definition should be on a new line by itself, but we just ignore
-                // it for now as this is not defined as standard.
-                return;
-            }
-        }
-
         // Find the first token on this line.
         $firstLineColumn = $tokens[$stackPtr]['column'];
         for ($i = $stackPtr; $i >= 0; $i--) {
@@ -157,16 +145,18 @@ class Drupal_Sniffs_Array_ArraySniff implements PHP_CodeSniffer_Sniff
                     break 2;
                 }
 
-                // Skip nested arrays, they are checked in a next run.
+                // Long array syntax: Skip nested arrays, they are checked in a next
+                // run.
+                if ($tokens[$newLineStart]['code'] === T_ARRAY) {
+                    $newLineStart = $tokens[$newLineStart]['parenthesis_closer'];
+                    $current_line = $tokens[$newLineStart]['line'];
+                }
+
+                // Short array syntax: Skip nested arrays, they are checked in a next
+                // run.
                 if ($tokens[$newLineStart]['code'] === T_OPEN_SHORT_ARRAY) {
-                    // Skip the whole line.
-                    $current_line++;
-                    $newLineStart = $phpcsFile->findNext(
-                        PHP_CodeSniffer_Tokens::$emptyTokens,
-                        ($tokens[$newLineStart][$parenthesis_closer] + 2),
-                        ($tokens[$stackPtr][$parenthesis_closer] + 1),
-                        true
-                    );
+                    $newLineStart = $tokens[$newLineStart]['bracket_closer'];
+                    $current_line = $tokens[$newLineStart]['line'];
                 }
 
             }//end while
