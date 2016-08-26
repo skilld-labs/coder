@@ -55,6 +55,54 @@ class Drupal_Sniffs_WhiteSpace_ObjectOperatorIndentSniff implements PHP_CodeSnif
     {
         $tokens = $phpcsFile->getTokens();
 
+        // Check that there is only whitespace before the object operator and there
+        // is nothing lese on the line.
+        if ($tokens[($stackPtr - 1)]['code'] !== T_WHITESPACE || $tokens[($stackPtr - 1)]['column'] !== 1) {
+            return;
+        }
+
+        $previousLine = $phpcsFile->findPrevious(PHP_CodeSniffer_Tokens::$emptyTokens, $stackPtr - 2, null, true, null, true);
+
+        if ($previousLine === false) {
+            return;
+        }
+
+        $startOfLine = $previousLine;
+        while ($tokens[$startOfLine - 2]['line'] === $tokens[$startOfLine - 1]['line']) {
+            $startOfLine--;
+        }
+
+        $addiotionalIndent = 0;
+        if ($tokens[$startOfLine]['code'] !== T_OBJECT_OPERATOR) {
+            $addiotionalIndent += 2;
+        }
+
+        if ($tokens[$stackPtr]['column'] !== ($tokens[$startOfLine]['column'] + $addiotionalIndent)) {
+            $error = 'Object operator not indented correctly; expected %s spaces but found %s';
+            $data  = array(
+                      $tokens[$startOfLine]['column'] + $addiotionalIndent + 1,
+                      $tokens[$stackPtr]['column'] + 1,
+                     );
+            $phpcsFile->addError($error, $stackPtr, 'Indent', $data);
+        }
+
+        //print_r($tokens[$startOfLine]);
+    }
+
+
+    /**
+     * Processes this test, when one of its tokens is encountered.
+     *
+     * @param PHP_CodeSniffer_File $phpcsFile All the tokens found in the document.
+     * @param int                  $stackPtr  The position of the current token
+     *                                        in the stack passed in $tokens.
+     *
+     * @return void
+     */
+    public function process2(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    {
+        $tokens = $phpcsFile->getTokens();
+
         // Make sure this is the first object operator in a chain of them.
         $prev = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
         if ($prev === false || $tokens[$prev]['code'] !== T_VARIABLE) {

@@ -1400,3 +1400,15 @@ function test17(ConfigFactoryInterface $config_factory,
                 EntityTypeBundleInfoInterface $entity_type_bundle_info) {
   return 0;
 }
+
+/**
+ * Object operator indentation is fine like this.
+ */
+function is_table_empty($table_name, $database) {
+  return !$database->schema()->tableExists($table_name) ||
+    !$database->select($table_name)
+      ->countQuery()
+      ->range(0, 1)
+      ->execute()
+      ->fetchField();
+}
