@@ -18,9 +18,6 @@ class Drupal_Sniffs_WhiteSpace_ObjectOperatorIndentUnitTest extends CoderSniffUn
                 26 => 1,
                 28 => 1,
                 30 => 1,
-                31 => 1,
-                35 => 1,
-                36 => 1,
                );
 
     }//end getErrorList()
