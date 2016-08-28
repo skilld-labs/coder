@@ -88,6 +88,12 @@ class Drupal_Sniffs_WhiteSpace_ObjectOperatorIndentSniff implements PHP_CodeSnif
             }
         }
 
+        // Closing parenthesis can be indented in several ways, so rather use the
+        // line that opended the parenthesis.
+        if ($tokens[$startOfLine]['code'] === T_CLOSE_PARENTHESIS) {
+            $startOfLine = $this->findStartOfline($phpcsFile, $tokens[$startOfLine]['parenthesis_opener']);
+        }
+
         if ($tokens[$startOfLine]['code'] === T_OBJECT_OPERATOR) {
             // If there is some wrapping in function calls then there should be an
             // additional level of indentation.

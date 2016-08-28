@@ -1433,3 +1433,19 @@ ContentLanguageSettings::create([
 ])->setLanguageAlterable(TRUE)
   ->setDefaultLangcode('authors_default')
   ->save();
+
+/**
+ * Another example of correct operator indentation.
+ */
+function test19($link, $parents, $connection) {
+  return $connection
+    ->insert('book')
+    ->fields(array(
+      'nid' => $link['nid'],
+      'bid' => $link['bid'],
+      'pid' => $link['pid'],
+      'weight' => $link['weight'],
+    ) + $parents
+    )
+    ->execute();
+}
