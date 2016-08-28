@@ -88,6 +88,11 @@ class Drupal_Sniffs_WhiteSpace_ObjectOperatorIndentSniff implements PHP_CodeSnif
             } else {
                 $additionalIndent = 0;
             }
+        } else if (isset($tokens[$startOfLine]['nested_parenthesis']) === true
+            && (empty($tokens[$stackPtr]['nested_parenthesis']) === true
+            || $tokens[$startOfLine]['nested_parenthesis'] !== $tokens[$stackPtr]['nested_parenthesis'])
+        ) {
+            $additionalIndent = 0;
         } else {
             $additionalIndent = 2;
         }

@@ -1412,3 +1412,16 @@ function is_table_empty($table_name, $database) {
       ->execute()
       ->fetchField();
 }
+
+/**
+ * Another example of correct object operator indentation.
+ */
+function test18($key, $value, $connection) {
+  $connection->merge('foo')
+    ->keys(array(
+      'name' => $key,
+      'collection' => 'collection',
+    ))
+    ->fields(array('value' => $value))
+    ->execute();
+}
