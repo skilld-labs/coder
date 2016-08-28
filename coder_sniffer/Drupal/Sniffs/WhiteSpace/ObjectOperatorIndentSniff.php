@@ -77,19 +77,30 @@ class Drupal_Sniffs_WhiteSpace_ObjectOperatorIndentSniff implements PHP_CodeSnif
             $startOfLine++;
         }
 
-        $addiotionalIndent = 0;
-        if ($tokens[$startOfLine]['code'] !== T_OBJECT_OPERATOR) {
-            $addiotionalIndent += 2;
+        if ($tokens[$startOfLine]['code'] === T_OBJECT_OPERATOR) {
+            // If there is some wrapping in function calls then there should be an
+            // additional level of indentation.
+            if (isset($tokens[$stackPtr]['nested_parenthesis']) === true
+                && (empty($tokens[$startOfLine]['nested_parenthesis']) === true
+                || $tokens[$startOfLine]['nested_parenthesis'] !== $tokens[$stackPtr]['nested_parenthesis'])
+            ) {
+                $additionalIndent = 2;
+            } else {
+                $additionalIndent = 0;
+            }
+        } else {
+            $additionalIndent = 2;
         }
 
-        if ($tokens[$stackPtr]['column'] !== ($tokens[$startOfLine]['column'] + $addiotionalIndent)) {
+        if ($tokens[$stackPtr]['column'] !== ($tokens[$startOfLine]['column'] + $additionalIndent)) {
             $error          = 'Object operator not indented correctly; expected %s spaces but found %s';
-            $expectedIndent = ($tokens[$startOfLine]['column'] + $addiotionalIndent - 1);
+            $expectedIndent = ($tokens[$startOfLine]['column'] + $additionalIndent - 1);
             $data           = array(
                                $expectedIndent,
                                $tokens[$stackPtr]['column'] - 1,
                               );
             $fix            = $phpcsFile->addFixableError($error, $stackPtr, 'Indent', $data);
+
             if ($fix === true) {
                 $phpcsFile->fixer->replaceToken(($stackPtr - 1), str_repeat(' ', $expectedIndent));
             }
