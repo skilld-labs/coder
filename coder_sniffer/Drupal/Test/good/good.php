@@ -1425,3 +1425,11 @@ function test18($key, $value, $connection) {
     ->fields(array('value' => $value))
     ->execute();
 }
+
+// Correct object operator indentation.
+ContentLanguageSettings::create([
+  'target_entity_type_id' => 'entity_test',
+  'target_bundle' => 'some_bundle',
+])->setLanguageAlterable(TRUE)
+  ->setDefaultLangcode('authors_default')
+  ->save();

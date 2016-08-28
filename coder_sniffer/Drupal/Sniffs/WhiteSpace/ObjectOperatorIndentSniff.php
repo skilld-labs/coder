@@ -67,14 +67,25 @@ class Drupal_Sniffs_WhiteSpace_ObjectOperatorIndentSniff implements PHP_CodeSnif
             return;
         }
 
-        // Find the first non whitespace character on the previous line.
-        $startOfLine = $previousLine;
-        while ($tokens[($startOfLine - 1)]['line'] === $tokens[$startOfLine]['line']) {
-            $startOfLine--;
-        }
+        // Check if the line before is in the same scope and go back if necessary.
+        $scopeDiff = array($previousLine => $previousLine);
+        while (empty($scopeDiff) === false) {
+            // Find the first non whitespace character on the previous line.
+            $startOfLine      = $this->findStartOfline($phpcsFile, $previousLine);
+            $startParenthesis = array();
+            if (isset($tokens[$startOfLine]['nested_parenthesis']) === true) {
+                $startParenthesis = $tokens[$startOfLine]['nested_parenthesis'];
+            }
 
-        if ($tokens[$startOfLine]['code'] === T_WHITESPACE) {
-            $startOfLine++;
+            $operatorParenthesis = array();
+            if (isset($tokens[$stackPtr]['nested_parenthesis']) === true) {
+                $operatorParenthesis = $tokens[$stackPtr]['nested_parenthesis'];
+            }
+
+            $scopeDiff = array_diff_assoc($startParenthesis, $operatorParenthesis);
+            if (empty($scopeDiff) === false) {
+                $previousLine = key($scopeDiff);
+            }
         }
 
         if ($tokens[$startOfLine]['code'] === T_OBJECT_OPERATOR) {
@@ -88,11 +99,6 @@ class Drupal_Sniffs_WhiteSpace_ObjectOperatorIndentSniff implements PHP_CodeSnif
             } else {
                 $additionalIndent = 0;
             }
-        } else if (isset($tokens[$startOfLine]['nested_parenthesis']) === true
-            && (empty($tokens[$stackPtr]['nested_parenthesis']) === true
-            || $tokens[$startOfLine]['nested_parenthesis'] !== $tokens[$stackPtr]['nested_parenthesis'])
-        ) {
-            $additionalIndent = 0;
         } else {
             $additionalIndent = 2;
         }
@@ -112,6 +118,34 @@ class Drupal_Sniffs_WhiteSpace_ObjectOperatorIndentSniff implements PHP_CodeSnif
         }
 
     }//end process()
+
+
+    /**
+     * Returns the first non whitespace token on the line.
+     *
+     * @param PHP_CodeSniffer_File $phpcsFile All the tokens found in the document.
+     * @param int                  $stackPtr  The position of the current token
+     *                                        in the stack passed in $tokens.
+     *
+     * @return int
+     */
+    protected function findStartOfline(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        // Find the first non whitespace character on the previous line.
+        $startOfLine = $stackPtr;
+        while ($tokens[($startOfLine - 1)]['line'] === $tokens[$startOfLine]['line']) {
+            $startOfLine--;
+        }
+
+        if ($tokens[$startOfLine]['code'] === T_WHITESPACE) {
+            $startOfLine++;
+        }
+
+        return $startOfLine;
+
+    }//end findStartOfline()
 
 
 }//end class
