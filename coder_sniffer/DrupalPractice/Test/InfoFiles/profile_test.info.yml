@@ -1,0 +1,9 @@
+name: 'Custom profile'
+type: profile
+description: 'Custom profile description.'
+core: 8.x
+dependencies:
+  - text
+  - drupal:rest
+themes:
+  - stark

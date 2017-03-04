@@ -49,6 +49,15 @@ class DrupalPractice_Sniffs_InfoFiles_NamespacedDependencySniff implements PHP_C
             return ($phpcsFile->numTokens + 1);
         }
 
+        foreach ($tokens as $token) {
+            if (preg_match('/^type:[\s]*profile/', $token['content']) === 1) {
+                // @todo Remove after https://www.drupal.org/node/2855026
+                return ($phpcsFile->numTokens + 1);
+            } else if (preg_match('/^type:[\s]*theme/', $token['content']) === 1) {
+                return ($phpcsFile->numTokens + 1);
+            }
+        }
+
         if (preg_match('/^dependencies:/', $tokens[$stackPtr]['content']) === 0) {
             return;
         }

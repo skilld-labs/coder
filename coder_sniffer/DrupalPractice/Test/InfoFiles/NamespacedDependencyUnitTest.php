@@ -3,7 +3,6 @@
 class DrupalPractice_Sniffs_InfoFiles_NamespacedDependencyUnitTest extends CoderSniffUnitTest
 {
 
-
     /**
      * Returns the lines where errors should occur.
      *
@@ -20,21 +19,21 @@ class DrupalPractice_Sniffs_InfoFiles_NamespacedDependencyUnitTest extends Coder
 
 
     /**
-     * Returns the lines where warnings should occur.
-     *
-     * The key of the array should represent the line number and the value
-     * should represent the number of warnings that should occur on that line.
-     *
-     * @return array(int => int)
+     * {@inheritdoc}
      */
     public function getWarningList($testFile)
     {
-        return array(
-                9 => 1,
-                11 => 1,
-                13 => 1,
-               );
-
+        switch ($testFile) {
+            case 'dependencies_test.info.yml':
+                return array(
+                    9 => 1,
+                    11 => 1,
+                    13 => 1,
+                );
+            case 'theme_test.info.yml':
+            case 'profile_test.info.yml':
+                return array();
+        }
     }//end getWarningList()
 
     /**
@@ -43,7 +42,11 @@ class DrupalPractice_Sniffs_InfoFiles_NamespacedDependencyUnitTest extends Coder
      * @return array The list of test files.
      */
     protected function getTestFiles() {
-        return array(__DIR__ . '/dependencies_test.info.yml');
+        return array(
+            __DIR__ . '/dependencies_test.info.yml',
+            __DIR__ . '/theme_test.info.yml',
+            __DIR__ . '/profile_test.info.yml',
+        );
     }
 
 
